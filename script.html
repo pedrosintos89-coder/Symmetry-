@@ -1,0 +1,134 @@
+const imageUpload = document.getElementById('imageUpload');
+const uploadStatus = document.getElementById('uploadStatus');
+const symmetryCanvas = document.getElementById('symmetryCanvas');
+const ctx = symmetryCanvas.getContext('2d');
+const applySymmetryButton = document.getElementById('applySymmetryButton');
+const downloadButton = document.getElementById('downloadButton');
+const noImageText = document.getElementById('noImageText');
+
+// عناصر تحكم جديدة
+const skewAngleInput = document.getElementById('skewAngle');
+const skewValueDisplay = document.getElementById('skewValue');
+
+let originalImage = new Image();
+let isImageLoaded = false;
+let currentSkewAngle = 0;
+
+// --------------------------------------------------------
+// --- GESTION DU CHARGEMENT ET DU CONTROLE ---
+// --------------------------------------------------------
+
+imageUpload.addEventListener('change', function(event) {
+    const file = event.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            originalImage.onload = function() {
+                isImageLoaded = true;
+                
+                // --- AJUSTEMENT DE TAILLE DU CANVAS (Pythagore) ---
+                // Le canvas doit être assez grand pour contenir la symétrie ET le skew sans rognage
+                const newWidth = originalImage.width * 2;
+                const newHeight = originalImage.height;
+                
+                // Définir la taille du canvas pour deux moitiés
+                symmetryCanvas.width = newWidth;
+                symmetryCanvas.height = newHeight;
+
+                // Afficher le canvas
+                symmetryCanvas.style.display = 'block';
+                noImageText.style.display = 'none';
+
+                // Activer les contrôles
+                applySymmetryButton.disabled = false;
+                skewAngleInput.disabled = false;
+
+                // Dessiner la symétrie initiale (Skew = 0)
+                drawSymmetry();
+                
+                uploadStatus.textContent = 'Image chargée. Ajustez l\'inclinaison si nécessaire.';
+                uploadStatus.className = 'status-message success';
+            };
+            originalImage.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    } else {
+        isImageLoaded = false;
+        applySymmetryButton.disabled = true;
+        skewAngleInput.disabled = true;
+        uploadStatus.textContent = 'Veuillez sélectionner une image.';
+        uploadStatus.className = 'status-message';
+    }
+});
+
+// Mettre à jour la valeur et redessiner lors du changement du slider
+skewAngleInput.addEventListener('input', function() {
+    currentSkewAngle = parseFloat(skewAngleInput.value);
+    skewValueDisplay.textContent = currentSkewAngle.toFixed(3);
+    if (isImageLoaded) {
+        drawSymmetry();
+    }
+});
+
+applySymmetryButton.addEventListener('click', function() {
+    if (isImageLoaded) {
+        drawSymmetry();
+        downloadButton.disabled = false;
+    }
+});
+
+downloadButton.addEventListener('click', function() {
+    if (isImageLoaded) {
+        const dataURL = symmetryCanvas.toDataURL('image/png');
+        const a = document.createElement('a');
+        a.href = dataURL;
+        a.download = 'facade_symetrique.png';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+    }
+});
+
+
+// --------------------------------------------------------
+// --- FONCTION PRINCIPALE DE DESSIN DE SYMÉTRIE ---
+// --------------------------------------------------------
+
+function drawSymmetry() {
+    if (!isImageLoaded) return;
+
+    ctx.clearRect(0, 0, symmetryCanvas.width, symmetryCanvas.height);
+
+    const halfWidth = originalImage.width;
+    const fullHeight = originalImage.height;
+
+    // --- 1. Dessiner la Moitié Gauche (Originale) ---
+    ctx.save();
+    ctx.drawImage(originalImage, 0, 0, halfWidth, fullHeight);
+    ctx.restore();
+
+    // --- 2. Dessiner la Moitié Droite (Réfléchie avec SKEW) ---
+    ctx.save();
+
+    // Appliquer la transformation Skew: ctx.transform(scaleX, skewY, skewX, scaleY, translateX, translateY)
+    
+    // 1. Déplacer au point de symétrie (fin de l'image originale)
+    ctx.translate(halfWidth, 0); 
+
+    // 2. Appliquer la valeur de skew (currentSkewAngle = skewX)
+    // Nous laissons scaleY à 1.
+    // skewY est laissé à 0 (pas de déformation verticale)
+    ctx.transform(1, 0, currentSkewAngle, 1, 0, 0); 
+    
+    // 3. Appliquer la réflexion horizontale (échelle de -1)
+    // Cela inverse la partie droite de l'image.
+    ctx.scale(-1, 1);
+    
+    // 4. Dessiner l'image (décalée de sa propre largeur pour qu'elle commence au point de symétrie)
+    ctx.drawImage(originalImage, -halfWidth, 0, halfWidth, fullHeight);
+
+    ctx.restore();
+}
+
+// Initialiser le dessin
+drawSymmetry();
