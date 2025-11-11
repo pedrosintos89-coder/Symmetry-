@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="fr" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arcanum: Application de Symétrie Architecturale</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f6f9;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 600px;
+            text-align: center;
+        }
+        h1 {
+            color: #3498db;
+            margin-bottom: 20px;
+        }
+        .upload-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 2px dashed #aed6f1;
+            border-radius: 10px;
+            background-color: #ecf0f1;
+        }
+        input[type="file"] {
+            display: block;
+            margin: 0 auto 15px;
+        }
+        .action-btn {
+            padding: 10px 20px;
+            background-color: #2ecc71;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+        .action-btn:hover:not(:disabled) {
+            background-color: #27ae60;
+        }
+        .action-btn:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        .results-section {
+            margin-top: 30px;
+            border-top: 1px solid #eee;
+            padding-top: 20px;
+        }
+        .result-box img, .result-box canvas {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+            margin: 15px auto;
+            display: block;
+        }
+        .status-message {
+            margin-top: 15px;
+            font-size: 1em;
+            color: #e74c3c;
+        }
+        .status-message.success {
+            color: #2ecc71;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>📐 Arcanum: Application de Symétrie Architecturale</h1>
+        <p>Téléchargez l'image (de préférence la moitié d'une façade de bâtiment). L'application la reflétera et complétera la façade automatiquement en appliquant la théorie de la Symétrie.</p>
+
+        <div class="upload-section">
+            <label for="buildingImageUpload">
+                Télécharger l'image du bâtiment :
+            </label>
+            <input type="file" id="buildingImageUpload" accept="image/*">
+            <button id="applySymmetryButton" class="action-btn" disabled>
+                Appliquer la Symétrie et Compléter la Façade
+            </button>
+            <p id="statusMessage" class="status-message">Veuillez d'abord sélectionner une image.</p>
+        </div>
+
+        <div class="results-section">
+            <h2>Résultat Final (Façade Complète)</h2>
+            <canvas id="transformedCanvas" style="display: none;"></canvas>
+            <p id="noResultText">La façade complétée apparaîtra ici.</p>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
